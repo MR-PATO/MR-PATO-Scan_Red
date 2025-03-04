@@ -24,10 +24,21 @@ pip install scapy netifaces
 
 ## Uso
 
+### Clonar y ejecutar
+Para clonar el repositorio y ejecutar el script, use los siguientes comandos:
+
+```sh
+git clone https://github.com/MR-PATO/MR-PATO-Scan_Red.git
+cd MR-PATO-Scan_Red
+python3 Scan_Red.py
+```
+
+
+
 Ejecuta el script con:
 
 ```sh
-python3 scanner.py
+python3 Scan_Red.py
 ```
 
 ### Menú de opciones
@@ -61,4 +72,4 @@ Seleccione una opción: 1
 
 ## Autor
 
-Desarrollado por Sr.Pato. 
+Desarrollado por Sr.Pato
