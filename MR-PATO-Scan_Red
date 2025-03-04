@@ -137,13 +137,11 @@ def menu():
 
 Versión: {VERSION}
 Autor: {AUTOR}
-_______________________________________________________________
 {AZUL}[1]{RESET}. Escanear dispositivos conectados con (Scapy)
 {AZUL}[2]{RESET}. Escanear dispositivos conectados con (Ping)
 {AZUL}[3]{RESET}. Escanear puertos abiertos
 {AZUL}[4]{RESET}. Salir
 {RESET}""")
-______________________________________________________________
 
 def main():
     dispositivos = []
