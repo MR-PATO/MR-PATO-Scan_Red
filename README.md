@@ -15,11 +15,28 @@ Este es un script en **Python 3** diseñado para **escáner redes y detectar dis
 Asegúrate de tener **Python 3** y las siguientes dependencias instaladas:
 
 ```sh
-pkg update && pkg upgrade -y  # Para usuarios de Termux
 apt update && apt upgrade -y  # Para usuarios de Kali Linux
-pkg install python -y         # Instalar Python en Termux
 apt install python3 -y        # Instalar Python en Kali Linux
 pip install scapy netifaces
+__________________________________________________________
+Requisitos y Ejecución en Termux
+Este script utiliza la biblioteca Scapy, la cual requiere permisos de root para funcionar correctamente en Termux debido a la necesidad de acceder a las interfaces de red en modo promiscuo.
+
+1: Ejecutar como root en Termux
+Si tienes acceso root en tu dispositivo, puedes ejecutar el script con permisos elevados utilizando el siguiente comando:
+
+Instala tsu (si no lo has hecho previamente) para obtener permisos de superusuario:
+
+bash
+
+pkg install tsu
+Ejecuta el script con permisos de superusuario:
+
+tsu python3 tu_script.py
+Solución 2: Ejecutar con sudo (si tienes acceso root en Termux)
+Si tienes configurado el acceso root en Termux, puedes ejecutar el script con el siguiente comando:
+
+sudo python3 Scan_Red 
 ```
 
 ## Uso
@@ -39,6 +56,7 @@ Ejecuta el script con:
 
 ```sh
 python3 Scan_Red
+sudo python3 Scan_Red # Para termux
 ```
 
 ### Menú de opciones
