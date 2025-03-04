@@ -32,7 +32,7 @@ bash
 pkg install tsu
 Ejecuta el script con permisos de superusuario:
 
-tsu python3 tu_script.py
+tsu python3 MR-PATO-Scan_Red.py
 ```
 
 ## Uso
@@ -43,7 +43,7 @@ Para clonar el repositorio y ejecutar el script, use los siguientes comandos:
 ```sh
 git clone https://github.com/MR-PATO/MR-PATO-Scan_Red.git
 cd MR-PATO-Scan_Red
-python3 Scan_Red
+python3 MR-PATO-Scan_Red.py
 ```
 
 
@@ -51,9 +51,9 @@ python3 Scan_Red
 Ejecuta el script con:
 
 ```sh
-python3 Scan_Red # Para kali linux
+python3 Scan_Red.py # Para kali linux
 _________________________________
-tsu python3 Scan_Red # Para termux
+tsu python3 Scan_Red.py # Para termux
 recuerda que debes terner permiso de superusuario(root)
 ```
 
@@ -71,9 +71,10 @@ recuerda que debes terner permiso de superusuario(root)
  ███████   ██  ██            ██  ██  ██  ██     ██     ██   ██
  ███████   █████             █████   ██  ██     ██     ██   ██
 
-1. Escanear dispositivos conectados
-2. Escanear puertos abiertos
-3. Salir
+1. Escanear dispositivos conectados con (scapy)
+2. Escanear dispositivos conectados con (ping)
+3. Escanear puertos abiertos
+4. Salir
 Seleccione una opción: 1
 
 [+] Dispositivos detectados:
