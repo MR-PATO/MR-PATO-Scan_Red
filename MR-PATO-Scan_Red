@@ -43,40 +43,43 @@ def hacer_ping(ip):
     return False
 
 def escanear_red_scapy():
-    """Escanea la red en busca de dispositivos activos usando Scapy en la red local."""
+    """Escanea los dispositivos activos en la misma red usando Scapy."""
     ip_local = obtener_ip_local()
     if not ip_local:
         print("No se pudo obtener la IP local. Asegúrate de estar conectado a una red.")
         return []
     
-    print(f"\n[+] Escaneando la red: {ip_local}/24...\n")
-    request = scapy.ARP(pdst=f"{ip_local}/24")
-    broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
-    packet = broadcast / request
-    dispositivos = scapy.srp(packet, timeout=2, verbose=False)[0]
-
-    resultados = []
-    for _, recibido in dispositivos:
-        ip_dispositivo = recibido.psrc
-        nombre_dispositivo = obtener_nombre_dispositivo(ip_dispositivo)
-        resultados.append({"ip": ip_dispositivo, "nombre": nombre_dispositivo})
-    
-    return resultados
-
-def escanear_red_ping():
-    """Escanea toda la red en la que estás conectado con ping."""
-    ip_local = obtener_ip_local()
-    if not ip_local:
-        print("No se pudo obtener la IP local. Asegúrate de estar conectado a una red.")
-        return []
-    
-    # Obtener la subred de la IP local
+    # Obtener la subred de la IP local (solo la misma red)
     red = ipaddress.IPv4Network(f"{ip_local}/24", strict=False)
     dispositivos = []
 
-    print(f"\n[+] Escaneando toda la red: {red}...\n")
+    print(f"\n[+] Escaneando la red local: {red}...\n")
+    request = scapy.ARP(pdst=f"{ip_local}/24")
+    broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+    packet = broadcast / request
+    dispositivos_encontrados = scapy.srp(packet, timeout=2, verbose=False)[0]
 
-    for ip in red.hosts():  # Escanea desde el rango de direcciones
+    for _, recibido in dispositivos_encontrados:
+        ip_dispositivo = recibido.psrc
+        nombre_dispositivo = obtener_nombre_dispositivo(ip_dispositivo)
+        dispositivos.append({"ip": ip_dispositivo, "nombre": nombre_dispositivo})
+    
+    return dispositivos
+
+def escanear_red_ping():
+    """Escanea los dispositivos activos en la misma red usando Ping."""
+    ip_local = obtener_ip_local()
+    if not ip_local:
+        print("No se pudo obtener la IP local. Asegúrate de estar conectado a una red.")
+        return []
+    
+    # Obtener la subred de la IP local (solo la misma red)
+    red = ipaddress.IPv4Network(f"{ip_local}/24", strict=False)
+    dispositivos = []
+
+    print(f"\n[+] Escaneando la red local: {red}...\n")
+
+    for ip in red.hosts():  # Escanea solo la misma red local
         ip_str = str(ip)
         if hacer_ping(ip_str):
             nombre = obtener_nombre_dispositivo(ip_str)
@@ -85,7 +88,7 @@ def escanear_red_ping():
     return dispositivos
 
 def escanear_puertos():
-    """Escanea los puertos abiertos de todos los dispositivos detectados en la red local."""
+    """Escanea los puertos abiertos de los dispositivos detectados en la red local."""
     ip_local = obtener_ip_local()
     if not ip_local:
         print("No se pudo obtener la IP local. Asegúrate de estar conectado a una red.")
@@ -135,10 +138,10 @@ def menu():
 Versión: {VERSION}
 Autor: {AUTOR}
 
-{AZUL}[1] Escanear dispositivos conectados con (Scapy){RESET}.
-{AZUL}[2] Escanear dispositivos conectados con (Ping){RESET}.
-{AZUL}[3] Escanear puertos abiertos{RESET}.
-{AZUL}[4] Salir{RESET}.
+{AZUL}[1]{RESET}. Escanear dispositivos conectados con (Scapy)
+{AZUL}[2]{RESET}. Escanear dispositivos conectados con (Ping)
+{AZUL}[3]{RESET}. Escanear puertos abiertos
+{AZUL}[4]{RESET}. Salir
 {RESET}""")
 
 def main():
