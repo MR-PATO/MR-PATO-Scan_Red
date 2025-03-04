@@ -72,7 +72,7 @@ recuerda que debes terner permiso de superusuario(root)
  ███████   █████             █████   ██  ██     ██     ██   ██
 
 1. Escanear dispositivos conectados con (scapy)
-2. Escanear dispositivos conectados con (ping)
+2. Escanear dispositivos conectados con (--)
 3. Escanear puertos abiertos
 4. Salir
 Seleccione una opción: 1
