@@ -53,11 +53,11 @@ def escanear_red_scapy(ip):
     return resultados
 
 def escanear_red_ping(rango_red):
-    """Escanea los dispositivos activos en la red con ping."""
-    print(f"\n[+] Escaneando la red: {rango_red}...\n")
+    """Escanea toda la red con ping para detectar dispositivos activos."""
+    print(f"\n[+] Escaneando toda la red: {rango_red}.0/24...\n")
     dispositivos = []
     
-    for i in range(1, 255):  # Rango común de direcciones IP en la subred
+    for i in range(1, 255):  # Escanea el rango 1-254 en la subred
         ip = f"{rango_red}.{i}"
         if hacer_ping(ip):
             nombre = obtener_nombre_dispositivo(ip)
@@ -118,7 +118,8 @@ def main():
             input("\nPresione Enter para continuar...")
 
         elif opcion == "2":
-            dispositivos = escanear_red_ping(ip_local)
+            rango_red = ip_local.rsplit(".", 1)[0]  # Obtiene la subred sin la última parte
+            dispositivos = escanear_red_ping(rango_red)
             if dispositivos:
                 print("\n[+] Dispositivos detectados:")
                 for dispositivo in dispositivos:
