@@ -33,10 +33,6 @@ pkg install tsu
 Ejecuta el script con permisos de superusuario:
 
 tsu python3 tu_script.py
-Solución 2: Ejecutar con sudo (si tienes acceso root en Termux)
-Si tienes configurado el acceso root en Termux, puedes ejecutar el script con el siguiente comando:
-
-sudo python3 Scan_Red 
 ```
 
 ## Uso
@@ -55,8 +51,10 @@ python3 Scan_Red
 Ejecuta el script con:
 
 ```sh
-python3 Scan_Red
-sudo python3 Scan_Red # Para termux
+python3 Scan_Red # Para kali linux
+_________________________________
+tsu python3 Scan_Red # Para termux
+recuerda que debes terner permiso de superusuario(root)
 ```
 
 ### Menú de opciones
