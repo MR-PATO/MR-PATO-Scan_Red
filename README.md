@@ -43,7 +43,6 @@ Para clonar el repositorio y ejecutar el script, use los siguientes comandos:
 ```sh
 git clone https://github.com/MR-PATO/MR-PATO-Scan_Red.git
 cd MR-PATO-Scan_Red
-pkg install nmap
 python3 MR-PATO-Scan_Red
 ```
 
@@ -73,7 +72,7 @@ recuerda que debes terner permiso de superusuario(root)
  ███████   █████             █████   ██  ██     ██     ██   ██
 
 1. Escanear dispositivos conectados con (scapy)
-2. Escanear dispositivos conectados con (nmap)
+2. Escanear dispositivos conectados con (ping)
 3. Escanear puertos abiertos
 4. Salir
 Seleccione una opción: 1
