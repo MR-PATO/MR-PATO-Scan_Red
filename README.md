@@ -30,7 +30,7 @@ Para clonar el repositorio y ejecutar el script, use los siguientes comandos:
 ```sh
 git clone https://github.com/MR-PATO/MR-PATO-Scan_Red.git
 cd MR-PATO-Scan_Red
-python3 Scan_Red.py
+python3 Scan_Red
 ```
 
 
@@ -38,7 +38,7 @@ python3 Scan_Red.py
 Ejecuta el script con:
 
 ```sh
-python3 Scan_Red.py
+python3 Scan_Red
 ```
 
 ### Menú de opciones
