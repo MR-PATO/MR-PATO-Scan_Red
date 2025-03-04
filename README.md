@@ -43,7 +43,8 @@ Para clonar el repositorio y ejecutar el script, use los siguientes comandos:
 ```sh
 git clone https://github.com/MR-PATO/MR-PATO-Scan_Red.git
 cd MR-PATO-Scan_Red
-python3 MR-PATO-Scan_Red.py
+pkg install nmap
+python3 MR-PATO-Scan_Red
 ```
 
 
@@ -51,9 +52,9 @@ python3 MR-PATO-Scan_Red.py
 Ejecuta el script con:
 
 ```sh
-python3 Scan_Red.py # Para kali linux
+python3 Scan_Red # Para kali linux
 _________________________________
-tsu python3 Scan_Red.py # Para termux
+tsu python3 Scan_Red # Para termux
 recuerda que debes terner permiso de superusuario(root)
 ```
 
@@ -72,7 +73,7 @@ recuerda que debes terner permiso de superusuario(root)
  ███████   █████             █████   ██  ██     ██     ██   ██
 
 1. Escanear dispositivos conectados con (scapy)
-2. Escanear dispositivos conectados con (--)
+2. Escanear dispositivos conectados con (nmap)
 3. Escanear puertos abiertos
 4. Salir
 Seleccione una opción: 1
