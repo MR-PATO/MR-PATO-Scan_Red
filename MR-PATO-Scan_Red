@@ -88,11 +88,11 @@ def menu():
  ██ █ ██   ██ ██             ██      ██████     ██     ██   ██                ██  ██       ██████   ██  ███            ██ ██    ██ █     ██  ██
  ██   ██   ██  ██    ██      ██      ██  ██     ██     ██   ██           ██   ██   ██  ██  ██  ██   ██   ██            ██  ██   ██   █   ██ ██
  ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████
-
-1. Escanear dispositivos conectados con (Scapy)
-2. Escanear dispositivos conectados con (Ping)
-3. Escanear puertos abiertos
-4. Salir
+ VERSION: 1               AUTOR:MR.Pato
+{AZUL}[1]{RESET}. Escanear dispositivos conectados con (Scapy)
+{AZUL}[2]{RESET}. Escanear dispositivos conectados con (Ping)
+{AZUL}[3]{RESET}. Escanear puertos abiertos
+{AZUL}[4]{RESET}. Salir
 {RESET}""")
 
 def main():
