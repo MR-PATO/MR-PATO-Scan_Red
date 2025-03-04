@@ -3,8 +3,14 @@ import socket
 import subprocess
 import scapy.all as scapy
 import netifaces
+import ipaddress
 
-# Código ANSI para color naranja
+# Título, versión y autor
+VERSION = "1.0"
+AUTOR = "MR.Pato"
+
+# Código ANSI para color azul y naranja
+AZUL = "\033[34m"
 NARANJA = "\033[38;5;214m"
 RESET = "\033[0m"
 
@@ -52,16 +58,24 @@ def escanear_red_scapy(ip):
     
     return resultados
 
-def escanear_red_ping(rango_red):
-    """Escanea toda la red con ping para detectar dispositivos activos."""
-    print(f"\n[+] Escaneando toda la red: {rango_red}.0/24...\n")
-    dispositivos = []
+def escanear_red_ping():
+    """Escanea toda la red en la que estás conectado con ping."""
+    ip_local = obtener_ip_local()
+    if not ip_local:
+        print("No se pudo obtener la IP local. Asegúrate de estar conectado a una red.")
+        return []
     
-    for i in range(1, 255):  # Escanea el rango 1-254 en la subred
-        ip = f"{rango_red}.{i}"
-        if hacer_ping(ip):
-            nombre = obtener_nombre_dispositivo(ip)
-            dispositivos.append({"ip": ip, "nombre": nombre})
+    # Obtener la subred de la IP local
+    red = ipaddress.IPv4Network(f"{ip_local}/24", strict=False)
+    dispositivos = []
+
+    print(f"\n[+] Escaneando toda la red: {red}...\n")
+
+    for ip in red.hosts():  # Escanea desde el rango de direcciones
+        ip_str = str(ip)
+        if hacer_ping(ip_str):
+            nombre = obtener_nombre_dispositivo(ip_str)
+            dispositivos.append({"ip": ip_str, "nombre": nombre})
     
     return dispositivos
 
@@ -88,7 +102,10 @@ def menu():
  ██ █ ██   ██ ██             ██      ██████     ██     ██   ██                ██  ██       ██████   ██  ███            ██ ██    ██ █     ██  ██
  ██   ██   ██  ██    ██      ██      ██  ██     ██     ██   ██           ██   ██   ██  ██  ██  ██   ██   ██            ██  ██   ██   █   ██ ██
  ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████
- VERSION: 1               AUTOR:MR.Pato
+
+Versión: {VERSION}
+Autor: {AUTOR}
+
 {AZUL}[1]{RESET}. Escanear dispositivos conectados con (Scapy)
 {AZUL}[2]{RESET}. Escanear dispositivos conectados con (Ping)
 {AZUL}[3]{RESET}. Escanear puertos abiertos
@@ -96,11 +113,6 @@ def menu():
 {RESET}""")
 
 def main():
-    ip_local = obtener_ip_local()
-    if not ip_local:
-        print("No se pudo determinar la IP local. Asegúrate de estar conectado a una red.")
-        return
-
     dispositivos = []
 
     while True:
@@ -108,6 +120,11 @@ def main():
         opcion = input("Seleccione una opción: ")
 
         if opcion == "1":
+            ip_local = obtener_ip_local()
+            if not ip_local:
+                print("No se pudo determinar la IP local. Asegúrate de estar conectado a una red.")
+                input("\nPresione Enter para continuar...")
+                continue
             dispositivos = escanear_red_scapy(ip_local)
             if dispositivos:
                 print("\n[+] Dispositivos detectados:")
@@ -118,8 +135,7 @@ def main():
             input("\nPresione Enter para continuar...")
 
         elif opcion == "2":
-            rango_red = ip_local.rsplit(".", 1)[0]  # Obtiene la subred sin la última parte
-            dispositivos = escanear_red_ping(rango_red)
+            dispositivos = escanear_red_ping()
             if dispositivos:
                 print("\n[+] Dispositivos detectados:")
                 for dispositivo in dispositivos:
