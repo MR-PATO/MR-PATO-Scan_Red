@@ -1,6 +1,7 @@
-import scapy.all as scapy
-import socket
 import os
+import socket
+import subprocess
+import scapy.all as scapy
 import netifaces
 
 # Código ANSI para color naranja
@@ -26,8 +27,17 @@ def obtener_nombre_dispositivo(ip):
         nombre = "Desconocido"
     return nombre
 
-def escanear_red(ip):
-    """Escanea la red en busca de dispositivos activos."""
+def hacer_ping(ip):
+    """Hace ping a la dirección IP y devuelve True si hay respuesta, False si no."""
+    respuesta = subprocess.run(
+        ["ping", "-c", "1", ip], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    if "1 packets transmitted, 1 received" in respuesta.stdout.decode():
+        return True
+    return False
+
+def escanear_red_scapy(ip):
+    """Escanea la red en busca de dispositivos activos usando Scapy."""
     print(f"\n[+] Escaneando la red: {ip}/24...\n")
     request = scapy.ARP(pdst=f"{ip}/24")
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
@@ -41,6 +51,19 @@ def escanear_red(ip):
         resultados.append({"ip": ip_dispositivo, "nombre": nombre_dispositivo})
     
     return resultados
+
+def escanear_red_ping(rango_red):
+    """Escanea los dispositivos activos en la red con ping."""
+    print(f"\n[+] Escaneando la red: {rango_red}...\n")
+    dispositivos = []
+    
+    for i in range(1, 255):  # Rango común de direcciones IP en la subred
+        ip = f"{rango_red}.{i}"
+        if hacer_ping(ip):
+            nombre = obtener_nombre_dispositivo(ip)
+            dispositivos.append({"ip": ip, "nombre": nombre})
+    
+    return dispositivos
 
 def escanear_puertos(ip):
     """Escanea los puertos abiertos de un dispositivo."""
@@ -64,11 +87,12 @@ def menu():
  ███████   █████             █████   ██  ██     ██     ██   ██  ██████    █████   ██       ██  ██   ██ ████  ██████    █████    ████     ██  ██
  ██ █ ██   ██ ██             ██      ██████     ██     ██   ██                ██  ██       ██████   ██  ███            ██ ██    ██ █     ██  ██
  ██   ██   ██  ██    ██      ██      ██  ██     ██     ██   ██           ██   ██   ██  ██  ██  ██   ██   ██            ██  ██   ██   █   ██ ██
- ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████ v.1.0.0
+ ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████
 
-1. Escanear dispositivos conectados
-2. Escanear puertos abiertos
-3. Salir
+1. Escanear dispositivos conectados con (Scapy)
+2. Escanear dispositivos conectados con (Ping)
+3. Escanear puertos abiertos
+4. Salir
 {RESET}""")
 
 def main():
@@ -84,7 +108,7 @@ def main():
         opcion = input("Seleccione una opción: ")
 
         if opcion == "1":
-            dispositivos = escanear_red(ip_local)
+            dispositivos = escanear_red_scapy(ip_local)
             if dispositivos:
                 print("\n[+] Dispositivos detectados:")
                 for dispositivo in dispositivos:
@@ -94,8 +118,18 @@ def main():
             input("\nPresione Enter para continuar...")
 
         elif opcion == "2":
+            dispositivos = escanear_red_ping(ip_local)
+            if dispositivos:
+                print("\n[+] Dispositivos detectados:")
+                for dispositivo in dispositivos:
+                    print(f"    {dispositivo['ip']} - {dispositivo['nombre']}")
+            else:
+                print("\n[-] No se encontraron dispositivos en la red.")
+            input("\nPresione Enter para continuar...")
+
+        elif opcion == "3":
             if not dispositivos:
-                print("\n[-] Primero debe escanear los dispositivos con la opción 1.")
+                print("\n[-] Primero debe escanear los dispositivos con las opciones anteriores.")
             else:
                 print("\n[+] Escaneando puertos abiertos...\n")
                 for dispositivo in dispositivos:
@@ -107,7 +141,7 @@ def main():
                         print(f"    No se encontraron puertos abiertos en {dispositivo['ip']}-{dispositivo['nombre']}")
             input("\nPresione Enter para continuar...")
 
-        elif opcion == "3":
+        elif opcion == "4":
             print("\nSaliendo del programa...")
             break
         else:
