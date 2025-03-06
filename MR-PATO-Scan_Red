@@ -1,127 +1,58 @@
 import os
 import socket
-import subprocess
 import scapy.all as scapy
-import netifaces
-import ipaddress
 
-# Título, versión y autor
 VERSION = "1.0"
 AUTOR = "MR.Pato"
 
-# Código ANSI para color azul y naranja
 AZUL = "\033[34m"
 NARANJA = "\033[38;5;214m"
 RESET = "\033[0m"
 
-def obtener_ip_local():
-    """Obtiene la IP local del dispositivo."""
-    interfaces = netifaces.interfaces()
-    for interface in interfaces:
-        if netifaces.AF_INET in netifaces.ifaddresses(interface):
-            ip_info = netifaces.ifaddresses(interface)[netifaces.AF_INET][0]
-            ip = ip_info["addr"]
-            if ip.startswith("192.168.") or ip.startswith("10.") or ip.startswith("172."):
-                return ip
-    return None
-
 def obtener_nombre_dispositivo(ip):
-    """Obtiene el nombre del dispositivo mediante una búsqueda inversa."""
     try:
-        nombre = socket.gethostbyaddr(ip)[0]
+        return socket.gethostbyaddr(ip)[0]
     except socket.herror:
-        nombre = "Desconocido"
-    return nombre
-
-def hacer_ping(ip):
-    """Hace ping a la dirección IP y devuelve True si hay respuesta, False si no."""
-    respuesta = subprocess.run(
-        ["ping", "-c", "1", ip], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
-    if "1 packets transmitted, 1 received" in respuesta.stdout.decode():
-        return True
-    return False
+        return "Desconocido"
 
 def escanear_red_scapy():
-    """Escanea los dispositivos activos en la misma red usando Scapy."""
-    ip_local = obtener_ip_local()
-    if not ip_local:
-        print("No se pudo obtener la IP local. Asegúrate de estar conectado a una red.")
-        return []
-    
-    # Obtener la subred de la IP local (solo la misma red)
-    red = ipaddress.IPv4Network(f"{ip_local}/24", strict=False)
+    ip_local = socket.gethostbyname(socket.gethostname())
+    ip_red = ".".join(ip_local.split(".")[:-1]) + ".1/24"
     dispositivos = []
 
-    print(f"\n[+] Escaneando la red local: {red}...\n")
-    request = scapy.ARP(pdst=f"{ip_local}/24")
+    print(f"\n[+] Escaneando la red: {ip_red}...\n")
+    request = scapy.ARP(pdst=ip_red)
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
     packet = broadcast / request
-    dispositivos_encontrados = scapy.srp(packet, timeout=2, verbose=False)[0]
+    resultado = scapy.srp(packet, timeout=2, verbose=False)[0]
 
-    for _, recibido in dispositivos_encontrados:
-        ip_dispositivo = recibido.psrc
-        nombre_dispositivo = obtener_nombre_dispositivo(ip_dispositivo)
-        dispositivos.append({"ip": ip_dispositivo, "nombre": nombre_dispositivo})
-    
+    for _, recibido in resultado:
+        dispositivos.append({
+            "ip": recibido.psrc,
+            "nombre": obtener_nombre_dispositivo(recibido.psrc)
+        })
+
     return dispositivos
 
-def escanear_red_ping():
-    """Escanea los dispositivos activos en la misma red usando Ping."""
-    ip_local = obtener_ip_local()
-    if not ip_local:
-        print("No se pudo obtener la IP local. Asegúrate de estar conectado a una red.")
-        return []
-    
-    # Obtener la subred de la IP local (solo la misma red)
-    red = ipaddress.IPv4Network(f"{ip_local}/24", strict=False)
-    dispositivos = []
-
-    print(f"\n[+] Escaneando la red local: {red}...\n")
-
-    for ip in red.hosts():  # Escanea solo la misma red local
-        ip_str = str(ip)
-        if hacer_ping(ip_str):
-            nombre = obtener_nombre_dispositivo(ip_str)
-            dispositivos.append({"ip": ip_str, "nombre": nombre})
-    
-    return dispositivos
-
-def escanear_puertos():
-    """Escanea los puertos abiertos de los dispositivos detectados en la red local."""
-    ip_local = obtener_ip_local()
-    if not ip_local:
-        print("No se pudo obtener la IP local. Asegúrate de estar conectado a una red.")
-        return []
-
-    dispositivos = escanear_red_scapy()  # Usamos escaneo con Scapy para obtener dispositivos en la red
+def escanear_puertos(dispositivos):
     puertos_dispositivos = []
+    print("\n[+] Escaneando puertos abiertos...\n")
 
-    if dispositivos:
-        print("\n[+] Escaneando puertos abiertos...\n")
-        for dispositivo in dispositivos:
-            puertos_abiertos = []
-            for puerto in range(1, 1025):  # Escanear puertos del 1 al 1024
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(1)  # Timeout de 1 segundo para cada intento
-                resultado = sock.connect_ex((dispositivo["ip"], puerto))
-                if resultado == 0:
-                    puertos_abiertos.append(puerto)
-                sock.close()
+    for dispositivo in dispositivos:
+        abiertos = []
+        for puerto in range(1, 1025):
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            if sock.connect_ex((dispositivo["ip"], puerto)) == 0:
+                abiertos.append(puerto)
+            sock.close()
 
-            if puertos_abiertos:
-                puertos_dispositivos.append({
-                    "ip": dispositivo["ip"],
-                    "nombre": dispositivo["nombre"],
-                    "puertos": puertos_abiertos
-                })
-            else:
-                puertos_dispositivos.append({
-                    "ip": dispositivo["ip"],
-                    "nombre": dispositivo["nombre"],
-                    "puertos": None
-                })
-    
+        puertos_dispositivos.append({
+            "ip": dispositivo["ip"],
+            "nombre": dispositivo["nombre"],
+            "puertos": abiertos if abiertos else "No hay puertos abiertos"
+        })
+
     return puertos_dispositivos
 
 def menu():
@@ -137,15 +68,12 @@ def menu():
 
 Versión: {VERSION}
 Autor: {AUTOR}
-{AZUL}[1]{RESET}. Escanear dispositivos conectados con (Scapy)
-{AZUL}[2]{RESET}. Escanear dispositivos conectados con (Ping)
-{AZUL}[3]{RESET}. Escanear puertos abiertos
-{AZUL}[4]{RESET}. Salir
+
+{AZUL}[1]{RESET}. Escanear dispositivos y puertos abiertos
+{AZUL}[2]{RESET}. Salir
 {RESET}""")
 
 def main():
-    dispositivos = []
-
     while True:
         menu()
         opcion = input("Seleccione una opción: ")
@@ -153,41 +81,24 @@ def main():
         if opcion == "1":
             dispositivos = escanear_red_scapy()
             if dispositivos:
-                print("\n[+] Dispositivos detectados:")
-                for dispositivo in dispositivos:
-                    print(f"    {dispositivo['ip']} - {dispositivo['nombre']}")
+                print("\n[+] Dispositivos encontrados:")
+                for d in dispositivos:
+                    print(f"    {d['ip']} - {d['nombre']}")
+
+                puertos = escanear_puertos(dispositivos)
+                print("\n[+] Puertos abiertos:")
+                for p in puertos:
+                    print(f"    {p['ip']} - {p['nombre']} - {p['puertos']}")
             else:
-                print("\n[-] No se encontraron dispositivos en la red.")
+                print("\n[-] No se encontraron dispositivos.")
+
             input("\nPresione Enter para continuar...")
 
         elif opcion == "2":
-            dispositivos = escanear_red_ping()
-            if dispositivos:
-                print("\n[+] Dispositivos detectados:")
-                for dispositivo in dispositivos:
-                    print(f"    {dispositivo['ip']} - {dispositivo['nombre']}")
-            else:
-                print("\n[-] No se encontraron dispositivos en la red.")
-            input("\nPresione Enter para continuar...")
-
-        elif opcion == "3":
-            puertos_dispositivos = escanear_puertos()
-            if puertos_dispositivos:
-                for dispositivo in puertos_dispositivos:
-                    if dispositivo["puertos"]:
-                        for puerto in dispositivo["puertos"]:
-                            print(f"    {puerto} abierto - {dispositivo['ip']}-{dispositivo['nombre']}")
-                    else:
-                        print(f"    No se encontraron puertos abiertos en {dispositivo['ip']}-{dispositivo['nombre']}")
-            else:
-                print("\n[-] No se encontraron dispositivos para escanear puertos.")
-            input("\nPresione Enter para continuar...")
-
-        elif opcion == "4":
-            print("\nSaliendo del programa...")
+            print("\nSaliendo...")
             break
         else:
-            print("\n[!] Opción no válida, intente de nuevo.")
+            print("\n[!] Opción inválida.")
 
 if __name__ == "__main__":
     main()
