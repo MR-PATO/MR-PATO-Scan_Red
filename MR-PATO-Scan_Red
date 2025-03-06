@@ -60,12 +60,13 @@ def menu():
  ██   ██   ██  ██    ██      ██      ██  ██     ██     ██   ██           ██   ██   ██  ██  ██  ██   ██   ██            ██  ██   ██   █   ██ ██
  ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████
                                                   
-Versión: 1.2.0
+Versión: 1.4.0
 Autor: MR.Pato
 {RESET}
 {AZUL}[1] Escanear dispositivos en la red (Scapy)
 [2] Escanear puertos abiertos en dispositivos detectados
-[3] Salir{RESET}
+[3] Escanear puertos en una IP específica
+[4] Salir{RESET}
 """)
 
 def main():
@@ -100,6 +101,13 @@ def main():
             input("\nPresione Enter para continuar...")
 
         elif opcion == "3":
+            ip_objetivo = input("\nIngrese la IP que desea escanear: ")
+            nombre_objetivo = obtener_nombre(ip_objetivo)
+            print(f"\n[+] Escaneando puertos en {ip_objetivo} ({nombre_objetivo})...\n")
+            escanear_puertos(ip_objetivo, nombre_objetivo)
+            input("\nPresione Enter para continuar...")
+
+        elif opcion == "4":
             print("\nSaliendo del programa...")
             break
         else:
