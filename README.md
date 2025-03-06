@@ -32,7 +32,7 @@ bash
 pkg install tsu
 Ejecuta el script con permisos de superusuario:
 
-tsu python3 MR-PATO-Scan_Red.py
+tsu python3 MR-PATO-SCAN_RED.py
 ```
 
 ## Uso
@@ -43,7 +43,7 @@ Para clonar el repositorio y ejecutar el script, use los siguientes comandos:
 ```sh
 git clone https://github.com/MR-PATO/MR-PATO-Scan_Red.git
 cd MR-PATO-Scan_Red
-python3 MR-PATO-Scan_Red
+python3 MR-PATO-SCAN_RED.py
 ```
 
 
@@ -51,9 +51,9 @@ python3 MR-PATO-Scan_Red
 Ejecuta el script con:
 
 ```sh
-python3 Scan_Red # Para kali linux
+python3 MR-PATO-SCAN_RED.py # Para kali linux
 _________________________________
-tsu python3 Scan_Red # Para termux
+python3 MR-PATO-SCAN_RED.py # Para termux
 recuerda que debes terner permiso de superusuario(root)
 ```
 
@@ -66,14 +66,18 @@ recuerda que debes terner permiso de superusuario(root)
 ## Ejemplo de salida
 
 ```
-███   ███  ██████            ██████     ██     ██████    █████
- ███ ███   ██  ██            ██  ██   ████    █ ███ █   ██   ██
- ███████   ██  ██            ██  ██  ██  ██     ██     ██   ██
- ███████   █████             █████   ██  ██     ██     ██   ██
+███   ███  ██████            ██████     ██     ██████    █████             █████     ████     ██     ██   ██           ██████   ███████  █████
+ ███ ███   ██  ██            ██  ██   ████    █ ███ █   ██   ██           ██   ██   ██  ██   ████    ███  ██            ██  ██   ██   █   ██ ██
+ ███████   ██  ██            ██  ██  ██  ██     ██     ██   ██           █        ██       ██  ██   ████ ██            ██  ██   ██ █     ██  ██
+ ███████   █████             █████   ██  ██     ██     ██   ██  ██████    █████   ██       ██  ██   ██ ████  ██████    █████    ████     ██  ██
+ ██ █ ██   ██ ██             ██      ██████     ██     ██   ██                ██  ██       ██████   ██  ███            ██ ██    ██ █     ██  ██
+ ██   ██   ██  ██    ██      ██      ██  ██     ██     ██   ██           ██   ██   ██  ██  ██  ██   ██   ██            ██  ██   ██   █   ██ ██
+ ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████
 
 1. Escanear dispositivos conectados con (scapy)
-2. Escanear puertos abiertos
-3. Salir
+2, Escanear puertos abiertos
+3. Escanear una ip especifica
+4. Salir
 Seleccione una opción: 1
 
 [+] Dispositivos detectados:
@@ -83,7 +87,7 @@ Seleccione una opción: 1
 
 ## Notas
 
-- Este script requiere permisos de **root** en Kali Linux (`sudo python3 scanner.py`).
+- Este script requiere permisos de **root** en Kali Linux (`sudo MR-PATO-SCAN_RED.py`).
 - En **Termux**, asegúrate de tener activados los permisos adecuados.
 
 ## Autor
