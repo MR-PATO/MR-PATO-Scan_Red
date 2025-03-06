@@ -1,63 +1,54 @@
-import os
-import socket
 import scapy.all as scapy
-
-VERSION = "1.0"
-AUTOR = "MR.Pato"
+import socket
+import os
+import netifaces
 
 AZUL = "\033[34m"
-NARANJA = "\033[38;5;214m"
 RESET = "\033[0m"
 
-def obtener_nombre_dispositivo(ip):
+def obtener_ip_local():
+    interfaces = netifaces.interfaces()
+    for interfaz in interfaces:
+        if netifaces.AF_INET in netifaces.ifaddresses(interfaz):
+            ip_info = netifaces.ifaddresses(interfaz)[netifaces.AF_INET][0]
+            ip = ip_info["addr"]
+            if ip.startswith(("192.168.", "10.", "172.")):
+                return ip
+    return None
+
+def obtener_nombre(ip):
     try:
         return socket.gethostbyaddr(ip)[0]
     except socket.herror:
         return "Desconocido"
 
-def escanear_red_scapy():
-    ip_local = socket.gethostbyname(socket.gethostname())
-    ip_red = ".".join(ip_local.split(".")[:-1]) + ".1/24"
-    dispositivos = []
-
-    print(f"\n[+] Escaneando la red: {ip_red}...\n")
-    request = scapy.ARP(pdst=ip_red)
+def escanear_red(ip):
+    print(f"\n[+] Escaneando dispositivos en la red {ip}/24...\n")
+    request = scapy.ARP(pdst=f"{ip}/24")
     broadcast = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
-    packet = broadcast / request
-    resultado = scapy.srp(packet, timeout=2, verbose=False)[0]
+    respuesta = scapy.srp(broadcast / request, timeout=2, verbose=False)[0]
 
-    for _, recibido in resultado:
-        dispositivos.append({
-            "ip": recibido.psrc,
-            "nombre": obtener_nombre_dispositivo(recibido.psrc)
-        })
+    dispositivos = []
+    for _, recibido in respuesta:
+        ip_dispositivo = recibido.psrc
+        nombre = obtener_nombre(ip_dispositivo)
+        dispositivos.append({"ip": ip_dispositivo, "nombre": nombre})
 
     return dispositivos
 
-def escanear_puertos(dispositivos):
-    puertos_dispositivos = []
-    print("\n[+] Escaneando puertos abiertos...\n")
-
-    for dispositivo in dispositivos:
-        abiertos = []
-        for puerto in range(1, 1025):
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(1)
-            if sock.connect_ex((dispositivo["ip"], puerto)) == 0:
-                abiertos.append(puerto)
-            sock.close()
-
-        puertos_dispositivos.append({
-            "ip": dispositivo["ip"],
-            "nombre": dispositivo["nombre"],
-            "puertos": abiertos if abiertos else "No hay puertos abiertos"
-        })
-
-    return puertos_dispositivos
+def escanear_puertos(ip):
+    puertos_abiertos = []
+    for puerto in range(1, 1025):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(0.5)
+        if sock.connect_ex((ip, puerto)) == 0:
+            puertos_abiertos.append(puerto)
+        sock.close()
+    return puertos_abiertos
 
 def menu():
     os.system("clear")
-    print(f"""{NARANJA}
+    print(f"""{AZUL}
 ███   ███  ██████            ██████     ██     ██████    █████             █████     ████     ██     ██   ██           ██████   ███████  █████
  ███ ███   ██  ██            ██  ██   ████    █ ███ █   ██   ██           ██   ██   ██  ██   ████    ███  ██            ██  ██   ██   █   ██ ██
  ███████   ██  ██            ██  ██  ██  ██     ██     ██   ██           █        ██       ██  ██   ████ ██            ██  ██   ██ █     ██  ██
@@ -65,40 +56,56 @@ def menu():
  ██ █ ██   ██ ██             ██      ██████     ██     ██   ██                ██  ██       ██████   ██  ███            ██ ██    ██ █     ██  ██
  ██   ██   ██  ██    ██      ██      ██  ██     ██     ██   ██           ██   ██   ██  ██  ██  ██   ██   ██            ██  ██   ██   █   ██ ██
  ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████
-
-Versión: {VERSION}
-Autor: {AUTOR}
-
-{AZUL}[1]{RESET}. Escanear dispositivos y puertos abiertos
-{AZUL}[2]{RESET}. Salir
-{RESET}""")
+                                                  
+Versión: 1
+Autor: MR.Pato
+{RESET}
+[1] Escanear dispositivos en la red (Scapy)
+[2] Escanear puertos abiertos en dispositivos detectados
+[3] Salir
+""")
 
 def main():
+    ip_local = obtener_ip_local()
+    if not ip_local:
+        print("No se pudo determinar la IP local. Asegúrate de estar conectado a una red.")
+        return
+
+    dispositivos = []
+
     while True:
         menu()
         opcion = input("Seleccione una opción: ")
 
         if opcion == "1":
-            dispositivos = escanear_red_scapy()
+            dispositivos = escanear_red(ip_local)
             if dispositivos:
-                print("\n[+] Dispositivos encontrados:")
+                print("\n[+] Dispositivos detectados:")
                 for d in dispositivos:
                     print(f"    {d['ip']} - {d['nombre']}")
-
-                puertos = escanear_puertos(dispositivos)
-                print("\n[+] Puertos abiertos:")
-                for p in puertos:
-                    print(f"    {p['ip']} - {p['nombre']} - {p['puertos']}")
             else:
                 print("\n[-] No se encontraron dispositivos.")
-
             input("\nPresione Enter para continuar...")
 
         elif opcion == "2":
-            print("\nSaliendo...")
+            if not dispositivos:
+                print("\n[-] Primero debe escanear los dispositivos con la opción 1.")
+            else:
+                print("\n[+] Escaneando puertos abiertos...\n")
+                for d in dispositivos:
+                    puertos = escanear_puertos(d["ip"])
+                    if puertos:
+                        for p in puertos:
+                            print(f"    {p} abierto - {d['ip']} - {d['nombre']}")
+                    else:
+                        print(f"    No hay puertos abiertos en {d['ip']} - {d['nombre']}")
+            input("\nPresione Enter para continuar...")
+
+        elif opcion == "3":
+            print("\nSaliendo del programa...")
             break
         else:
-            print("\n[!] Opción inválida.")
+            print("\n[!] Opción no válida, intente de nuevo.")
 
 if __name__ == "__main__":
     main()
