@@ -36,15 +36,15 @@ def escanear_red(ip):
 
     return dispositivos
 
-def escanear_puertos(ip):
-    puertos_abiertos = []
+def escanear_puertos(ip, nombre):
     for puerto in range(1, 1025):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(0.5)
         if sock.connect_ex((ip, puerto)) == 0:
-            puertos_abiertos.append(puerto)
+            print(f"{puerto} abierto ({ip}, {nombre})")
+        else:
+            print(f"{puerto} cerrado ({ip}, {nombre})")
         sock.close()
-    return puertos_abiertos
 
 def menu():
     os.system("clear")
@@ -91,14 +91,9 @@ def main():
             if not dispositivos:
                 print("\n[-] Primero debe escanear los dispositivos con la opción 1.")
             else:
-                print("\n[+] Escaneando puertos abiertos...\n")
+                print("\n[+] Escaneando puertos abiertos y cerrados...\n")
                 for d in dispositivos:
-                    puertos = escanear_puertos(d["ip"])
-                    if puertos:
-                        for p in puertos:
-                            print(f"    {p} abierto - {d['ip']} - {d['nombre']}")
-                    else:
-                        print(f"    No hay puertos abiertos en {d['ip']} - {d['nombre']}")
+                    escanear_puertos(d["ip"], d["nombre"])
             input("\nPresione Enter para continuar...")
 
         elif opcion == "3":
