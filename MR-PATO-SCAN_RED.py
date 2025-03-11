@@ -57,13 +57,14 @@ def obtener_velocidad():
 
 def escanear_puertos(ip, nombre):
     timeout = obtener_velocidad()
+    print(f"\nEscaneando puertos en {ip} ({nombre})...\n")
     for puerto in range(1, 65536):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
         resultado = sock.connect_ex((ip, puerto))
         estado = "abierto" if resultado == 0 else "cerrado"
         color = VERDE if resultado == 0 else ROJO
-        print(f"{color}Escaneando puerto {puerto}: {estado} ({ip}, {nombre}){RESET}")
+        print(f"{color}{puerto} {estado} {ip} {nombre}{RESET}")
         sock.close()
 
 
