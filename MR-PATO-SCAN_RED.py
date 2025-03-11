@@ -9,6 +9,7 @@ VERDE = "\033[32m"
 NARANJA = "\033[33m"
 RESET = "\033[0m"
 
+
 def obtener_ip_local():
     interfaces = netifaces.interfaces()
     for interfaz in interfaces:
@@ -19,11 +20,13 @@ def obtener_ip_local():
                 return ip
     return None
 
+
 def obtener_nombre(ip):
     try:
         return socket.gethostbyaddr(ip)[0]
     except socket.herror:
         return "Desconocido"
+
 
 def escanear_red(ip):
     print(f"\n[+] Escaneando dispositivos en la red {ip}/24...\n")
@@ -39,15 +42,28 @@ def escanear_red(ip):
 
     return dispositivos
 
+
+def obtener_velocidad():
+    print(f"{NARANJA}\nSeleccione la velocidad de escaneo:")
+    print("1. Lento (2 segundos por puerto)")
+    print("2. Rápido (0.5 segundos por puerto)")
+    print("3. Súper rápido (0.1 segundos por puerto)")
+    print("4. Ultra rápido (0.01 segundos por puerto)")
+    print(RESET)
+    opcion = input("Seleccione una opción: ")
+    velocidades = {"1": 2, "2": 0.5, "3": 0.1, "4": 0.01}
+    return velocidades.get(opcion, 0.5)
+
+
 def escanear_puertos(ip, nombre):
-    for puerto in range(1, 1025):
+    timeout = obtener_velocidad()
+    for puerto in range(1, 65536):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(0.5)
+        sock.settimeout(timeout)
         if sock.connect_ex((ip, puerto)) == 0:
             print(f"{VERDE}{puerto} abierto ({ip}, {nombre}){RESET}")
-        else:
-            print(f"{ROJO}{puerto} cerrado ({ip}, {nombre}){RESET}")
         sock.close()
+
 
 def menu():
     os.system("clear")
@@ -60,7 +76,7 @@ def menu():
  ██   ██   ██  ██    ██      ██      ██  ██     ██     ██   ██           ██   ██   ██  ██  ██  ██   ██   ██            ██  ██   ██   █   ██ ██
  ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████
                                                   
-Versión: 1.4.0
+Versión: 1.4.8
 Autor: MR.Pato
 {RESET}
 {AZUL}[1] Escanear dispositivos en la red (Scapy)
@@ -68,6 +84,7 @@ Autor: MR.Pato
 [3] Escanear puertos en una IP específica
 [4] Salir{RESET}
 """)
+
 
 def main():
     ip_local = obtener_ip_local()
@@ -95,7 +112,7 @@ def main():
             if not dispositivos:
                 print("\n[-] Primero debe escanear los dispositivos con la opción 1.")
             else:
-                print("\n[+] Escaneando puertos abiertos y cerrados...\n")
+                print("\n[+] Escaneando puertos abiertos en todos los dispositivos detectados...\n")
                 for d in dispositivos:
                     escanear_puertos(d["ip"], d["nombre"])
             input("\nPresione Enter para continuar...")
@@ -112,6 +129,7 @@ def main():
             break
         else:
             print("\n[!] Opción no válida, intente de nuevo.")
+
 
 if __name__ == "__main__":
     main()
