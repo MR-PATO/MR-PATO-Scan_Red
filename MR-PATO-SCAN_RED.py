@@ -45,10 +45,10 @@ def escanear_red(ip):
 
 def obtener_velocidad():
     print(f"{NARANJA}\nSeleccione la velocidad de escaneo:")
-    print("1. Lento (2 segundos por puerto)")
-    print("2. Rápido (0.5 segundos por puerto)")
-    print("3. Súper rápido (0.1 segundos por puerto)")
-    print("4. Ultra rápido (0.01 segundos por puerto)")
+    print(f"{NARANJA}1. Lento (2 segundos por puerto)")
+    print(f"{NARANJA}2. Rápido (0.5 segundos por puerto)")
+    print(f"{NARANJA}3. Súper rápido (0.1 segundos por puerto)")
+    print(f"{NARANJA}4. Ultra rápido (0.01 segundos por puerto)")
     print(RESET)
     opcion = input("Seleccione una opción: ")
     velocidades = {"1": 2, "2": 0.5, "3": 0.1, "4": 0.01}
@@ -57,12 +57,23 @@ def obtener_velocidad():
 
 def escanear_puertos(ip, nombre):
     timeout = obtener_velocidad()
+    print(f"\nEscaneando puertos en {ip} ({nombre})...\n")
+    
+    # Recorre todos los puertos del 1 al 65535
     for puerto in range(1, 65536):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(timeout)
-        if sock.connect_ex((ip, puerto)) == 0:
-            print(f"{VERDE}{puerto} abierto ({ip}, {nombre}){RESET}")
-        sock.close()
+        
+        # Se usa connect_ex para obtener el estado del puerto
+        resultado = sock.connect_ex((ip, puerto))
+        
+        # Verificar si el puerto está abierto o cerrado
+        estado = "abierto" if resultado == 0 else "cerrado"
+        color = VERDE if resultado == 0 else ROJO
+        
+        # Mostrar el puerto con su estado y color correspondiente
+        print(f"{color}{puerto} {estado} {ip} {nombre}{RESET}")
+        sock.close()  # Cerrar el socket después de cada intento
 
 
 def menu():
@@ -75,8 +86,8 @@ def menu():
  ██ █ ██   ██ ██             ██      ██████     ██     ██   ██                ██  ██       ██████   ██  ███            ██ ██    ██ █     ██  ██
  ██   ██   ██  ██    ██      ██      ██  ██     ██     ██   ██           ██   ██   ██  ██  ██  ██   ██   ██            ██  ██   ██   █   ██ ██
  ██   ██  ████ ██    ██     ████     ██  ██    ████     █████             █████     ████   ██  ██   ██   ██           ████ ██  ███████  █████
-                                                  
-Versión: 1.4.8
+                                                 
+Versión: 1.4.0
 Autor: MR.Pato
 {RESET}
 {AZUL}[1] Escanear dispositivos en la red (Scapy)
