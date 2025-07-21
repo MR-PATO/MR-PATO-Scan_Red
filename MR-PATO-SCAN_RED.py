@@ -1,4 +1,3 @@
-import scapy.all as scapy
 import socket
 import os
 import netifaces
